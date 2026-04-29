@@ -1,9 +1,10 @@
 import random
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 import json
 
 class MessageEngine:
     def __init__(self):
+        self.ist = timezone(timedelta(hours=5, minutes=30))
         # Category specific configurations
         self.category_config = {
             "restaurant": {
@@ -81,7 +82,7 @@ class MessageEngine:
         }
 
     def _get_day_context(self):
-        day = datetime.now().weekday()
+        day = datetime.now(self.ist).weekday()
         if day in [5, 6]:
             return "weekend"
         return "weekday"

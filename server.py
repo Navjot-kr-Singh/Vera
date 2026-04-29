@@ -3,7 +3,7 @@ from message_engine import MessageEngine
 from learning_tracker import LearningTracker
 from state_manager import StateManager
 import os
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 app = Flask(__name__, static_folder='static')
 engine = MessageEngine()
@@ -26,12 +26,18 @@ FESTIVAL_CALENDAR = {
     (12, 31): "New Year's Eve",
 }
 
+# Indian Standard Time Offset
+IST = timezone(timedelta(hours=5, minutes=30))
+
+def get_now_ist():
+    return datetime.now(IST)
+
 def _detect_festival():
-    now = datetime.now()
+    now = get_now_ist()
     return FESTIVAL_CALENDAR.get((now.month, now.day))
 
 def _detect_time_of_day():
-    hour = datetime.now().hour
+    hour = get_now_ist().hour
     if 6 <= hour < 11:
         return "morning"
     elif 11 <= hour < 15:
@@ -44,7 +50,7 @@ def _detect_time_of_day():
         return "night"
 
 def _detect_day_type():
-    return "weekend" if datetime.now().weekday() >= 5 else "weekday"
+    return "weekend" if get_now_ist().weekday() >= 5 else "weekday"
 
 # --- Judge /v1 API Implementation ---
 
@@ -187,7 +193,7 @@ def get_context():
         "day_type": day_type,
         "festival": festival,
         "suggested_trigger": suggested_trigger,
-        "current_time": datetime.now().strftime("%I:%M %p")
+        "current_time": get_now_ist().strftime("%I:%M %p")
     })
 
 @app.route('/api/generate', methods=['POST'])
